@@ -14,18 +14,18 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.set('view engine', 'jade');
-app.use('/uploads', express.static('uploads'));
+// app.use('/uploads', express.static('uploads'));
 
 app.use('/api', require('./routes'));
 
-if (fs.existsSync('uploads')) {
-    fs.mkdirSync('uploads');
-}
+// if (fs.existsSync('uploads')) {
+//     fs.mkdirSync('uploads');
+// }
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-    next(createError(404));
-});
+// // catch 404 and forward to error handler
+// app.use(function (req, res, next) {
+//     next(createError(404));
+// });
 
 // error handler
 app.use(function (err, req, res, next) {
