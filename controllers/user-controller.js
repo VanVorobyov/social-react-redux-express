@@ -1,7 +1,10 @@
 const {user} = require("@prisma/client");
 const {prisma} = require("../prisma/prisma-client");
-const jdenticon = require("jdenticon/standalone");
+const Jdenticon = require("jdenticon");
 const fs = require("fs");
+const bcrypt = require("bcryptjs");
+const path = require("path");
+
 
 const UserController = {
     register: async (req, res) => {
@@ -23,10 +26,10 @@ const UserController = {
             // хешируем пароль
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            // конвертируем аватар в png, даем имя, помещает в папку uploads
-            const png = jdenticon.toPng(name, 200);
+            // конвертируем аватар в png, даем имя, помещаем в папку uploads
+            const png = Jdenticon.toPng(name, 200);
             const avatarName = `name_${Date.now()}.png`;
-            const avatarPath = path.join(__dirname, '../uploads', avatarName);
+            const avatarPath = path.join(__dirname, '/../uploads', avatarName);
             fs.writeFileSync(avatarPath, png);
 
             // создаем пользователя
@@ -35,15 +38,15 @@ const UserController = {
                     email,
                     password: hashedPassword,
                     name,
-                    avatarUrl: `/uploads/${avatarPath}`,
+                    avatarUrl: `/uploads/${avatarName}`,
                 }
             });
 
-
-            // отправялем пользователя
+            // Отправляем пользователя
             res.json(user)
 
-        } catch (e) {
+        } catch (error) {
+            console.error('Error in REGISTER:', error);
             return res.status(500).json({error: 'Internal server error'});
         }
     },

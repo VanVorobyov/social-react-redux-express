@@ -1,12 +1,10 @@
-version: '3'
+version: '3.7'
 services:
-  loggerDB:
-    image:
-      mongo:latest
+  db:
+    image: prismagraphql/mongo-single-replica:4.4.3-bionic
+    platform: linux/amd64
+    ports:
+      - 27016:27017
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=user
-      - MONGO_INITDB_ROOT_PASSWORD=pass
-    volumes:
-      - type: bind
-        source: ./data
-        target: /data/db
+      MONGO_INITDB_ROOT_USERNAME: monty
+      MONGO_INITDB_ROOT_PASSWORD: pass
