@@ -4,12 +4,15 @@ const Jdenticon = require("jdenticon");
 const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const path = require("path");
+const jwt = require("jsonwebtoken");
 
 
 const UserController = {
     register: async (req, res) => {
+        // какие поля принимаем для работы
         const {email, password, name} = req.body;
 
+        // проверяем, заполнены ли обязательные поля
         if (!email || !password || !name) {
             return res.status(400).json({error: 'Все поля обязательные для заполнения'});
         }
@@ -42,7 +45,7 @@ const UserController = {
                 }
             });
 
-            // Отправляем пользователя
+            // Отправляем пользователя в базу данных
             res.json(user)
 
         } catch (error) {
@@ -51,7 +54,42 @@ const UserController = {
         }
     },
     login: async (req, res) => {
-        res.send('login');
+        // какие поля принимаем для работы
+        const {email, password} = req.body;
+
+        // проверяем, заполнены ли обязательные поля
+        if (!email || !password) {
+            return res.status(400).json({error: 'Все поля обязательные для заполнения'});
+        }
+
+        try {
+
+            // проверяем, существует ли пользователь с таким email
+            const user = await prisma.user.findUnique({
+                where: {email},
+            })
+
+            // если пользователя нет возвращаем ошибку
+            if (!user) {
+                return res.status(400).json({error: 'Неверный логин или пароль'});
+            }
+
+            // проверяем пароль
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+            if (!isPasswordValid) {
+                return res.status(400).json({error: 'Неверный логин или пароль'});
+            }
+
+            // генерируем токен
+            const token = jwt.sign({userID: user.id}, process.env.JWT_SECRET, {expiresIn: '1h'});
+
+            // возвращаем токен
+            res.json({token});
+
+        } catch (error) {
+            console.error("Error in LOGIN: ", error.message);
+            return res.status(500).json({error: 'Internal server error'});
+        }
     },
     updateUser: async (req, res) => {
         res.send('updateUser');
