@@ -8,13 +8,15 @@ const authenticateToken = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     // Извлекаем токен из заголовка
-    const token = authHeader && authHeader.split(' ');
+    const token = authHeader && authHeader.split('Bearer ')[1];
+
+    console.log(`token --> `, token)
 
     // Если токен не найден, возвращаем ошибку 401 Unauthorized
     if (token == null) return res.sendStatus(401).json({error: 'Unauthorized'});
 
     // Верифицируем токен с помощью секретного ключа
-    jwt.verify(token, process.env.SECRET_KEY_OF_SOCIAL_NETWORK, (err, user) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
 
         // Если ошибка при верификации, возвращаем ошибку 403 Forbidden
         if (err) return res.sendStatus(403).json({error: 'Forbidden'});

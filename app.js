@@ -22,7 +22,6 @@ app.use('/api', require('./routes'));
 // if (fs.existsSync('uploads')) {
 //     fs.mkdirSync('uploads');
 // }
-
 // // catch 404 and forward to error handler
 // app.use(function (req, res, next) {
 //     next(createError(404));
