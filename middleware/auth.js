@@ -10,8 +10,6 @@ const authenticateToken = (req, res, next) => {
     // Извлекаем токен из заголовка
     const token = authHeader && authHeader.split('Bearer ')[1];
 
-    console.log(`token --> `, token)
-
     // Если токен не найден, возвращаем ошибку 401 Unauthorized
     if (token == null) return res.sendStatus(401).json({error: 'Unauthorized'});
 

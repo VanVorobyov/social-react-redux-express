@@ -28,7 +28,7 @@ router.get('/', (req, res, next) => {
 router.post('/register', UserController.register);
 router.post('/login', UserController.login);
 router.get('/current', authenticateToken, UserController.currentUser);
-router.get('/users/:id', authenticateToken, UserController.login);
+router.get('/users/:id', authenticateToken, UserController.getUserById);
 router.put('/users/:id', authenticateToken, UserController.updateUser);
 
 

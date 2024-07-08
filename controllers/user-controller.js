@@ -1,4 +1,3 @@
-const {user} = require("@prisma/client");
 const {prisma} = require("../prisma/prisma-client");
 const Jdenticon = require("jdenticon");
 const fs = require("fs");
@@ -81,7 +80,7 @@ const UserController = {
             }
 
             // генерируем токен
-            const token = jwt.sign({userID: user.id}, process.env.JWT_SECRET, {expiresIn: '1h'});
+            const token = jwt.sign({userId: user.id}, process.env.JWT_SECRET, {expiresIn: '1h'});
 
             // возвращаем токен
             res.json({token});
@@ -95,7 +94,35 @@ const UserController = {
         res.send('updateUser');
     },
     getUserById: async (req, res) => {
-        res.send('getUserById');
+        const {id} = req.params
+        const userId = req.user.userId;
+
+        try {
+            const user = await prisma.user.findUnique({
+                where: {id},
+                include: {
+                    followers: true,
+                    following: true
+                }
+            })
+
+            if (!user) {
+                return res.status(400).json({error: 'Пользователь не найден'})
+            }
+
+            const isFollow = await prisma.follows.findFirst({
+                where: {
+                    AND: [
+                        {followerId: userId},
+                        {followingId: id}
+                    ]
+                }
+            })
+            res.json({...user, isFollow: Boolean(isFollow)})
+        } catch (error) {
+            console.error("Error in getUserById:", error.message);
+            res.status(500).json({error: 'Internal server error'})
+        }
     },
     currentUser: async (req, res) => {
         res.send('currentUser');
