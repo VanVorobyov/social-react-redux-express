@@ -191,8 +191,22 @@ const UserController = {
     },
 
     currentUser: async (req, res) => {
-        res.send('currentUser');
+        try {
+            // Ищем текущего пользователя в базе данных по 'userId' аутентифицированного пользователя
+            const user = await prisma.user.findUnique({
+                where: {id: req.user.userId}
+            });
+
+            // Возвращает данные текущего пользователя
+            res.json(user);
+        } catch (error) {
+            // Логирует любые ошибки, возникшие в процессе поиска пользователя
+            console.error("Error in currentUser:", error.message);
+            // Возвращает статус 500 при возникновении ошибки
+            res.status(500).json({error: 'Internal server error'});
+        }
     },
+
 }
 
 module.exports = UserController
