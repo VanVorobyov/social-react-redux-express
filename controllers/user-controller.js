@@ -94,36 +94,43 @@ const UserController = {
         res.send('updateUser');
     },
     getUserById: async (req, res) => {
-        const {id} = req.params
-        const userId = req.user.userId;
+        const {id} = req.params; // Извлекает параметр 'id' из URL запроса => :id
+        const userId = req.user.userId; // Извлекает 'userId' из информации аутентифицированного пользователя
 
         try {
+            // Пытается найти пользователя в базе данных по указанному 'id'
             const user = await prisma.user.findUnique({
                 where: {id},
                 include: {
-                    followers: true,
-                    following: true
+                    followers: true, // Включает подписчиков пользователя
+                    following: true  // Включает пользователей, на которых подписан данный пользователь
                 }
-            })
+            });
 
             if (!user) {
-                return res.status(400).json({error: 'Пользователь не найден'})
+                // Если пользователь не найден, возвращает статус 400 с сообщением об ошибке
+                return res.status(400).json({error: 'Пользователь не найден'});
             }
 
+            // Проверяет, подписан ли аутентифицированный пользователь на пользователя с указанным 'id'
             const isFollow = await prisma.follows.findFirst({
                 where: {
                     AND: [
-                        {followerId: userId},
-                        {followingId: id}
+                        {followerId: userId},  // Аутентифицированный пользователь как подписчик
+                        {followingId: id}      // Пользователь с указанным 'id' как тот, на кого подписываются
                     ]
                 }
-            })
-            res.json({...user, isFollow: Boolean(isFollow)})
+            });
+
+            // Возвращает данные пользователя вместе со статусом подписки
+            res.json({...user, isFollow: Boolean(isFollow)});
         } catch (error) {
+            // Логирует любые возникшие ошибки и возвращает статус 500 с сообщением об ошибке
             console.error("Error in getUserById:", error.message);
-            res.status(500).json({error: 'Internal server error'})
+            res.status(500).json({error: 'Internal server error'});
         }
     },
+
     currentUser: async (req, res) => {
         res.send('currentUser');
     },
