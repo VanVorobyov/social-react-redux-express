@@ -91,8 +91,67 @@ const UserController = {
         }
     },
     updateUser: async (req, res) => {
-        res.send('updateUser');
+        // Извлекает параметр 'id' из URL запроса => :id
+        const {id} = req.params;
+
+        // Извлекает поля пользователя из тела запроса
+        const {email, name, dateOfBirth, bio, location} = req.body;
+
+        let filePath;
+        // Извлекает путь к файлу, если он был загружен
+        if (req.file && req.file.path) {
+            filePath = req.file.path;
+        }
+
+        // Проверяет, совпадает ли 'id' из параметров с 'userId' аутентифицированного пользователя
+        if (id !== req.user.userId) {
+            // Возвращает статус 403, если 'id' не совпадает
+            return res.status(403).json({error: 'Forbidden'});
+        }
+
+        try {
+            // Проверяет, существует ли уже пользователь с указанным email
+            if (email) {
+                const user = await prisma.user.findFirst({
+                    where: {email},
+                });
+
+                // Если пользователь с таким email существует и это не текущий пользователь, возвращает ошибку
+                if (user && user.id !== id) {
+                    return res.status(400).json({error: 'Пользователь с таким email уже существует'});
+                }
+            }
+
+            // Обновляет данные пользователя в базе данных
+            const user = await prisma.user.update({
+                where: {id},
+                data: {
+                    // Обновляет email, если он предоставлен, иначе оставляет без изменений
+                    email: email || undefined,
+                    // Обновляет имя, если оно предоставлено, иначе оставляет без изменений
+                    name: name || undefined,
+                    // Обновляет дату рождения, если она предоставлена, иначе оставляет без изменений
+                    dateOfBirth: dateOfBirth || undefined,
+                    // Обновляет биографию, если она предоставлена, иначе оставляет без изменений
+                    bio: bio || undefined,
+                    // Обновляет местоположение, если оно предоставлено, иначе оставляет без изменений
+                    location: location || undefined,
+                    // Обновляет путь к аватару, если файл был загружен
+                    avatarUrl: filePath
+                }
+            });
+
+            // Возвращает обновленные данные пользователя
+            res.json(user);
+
+        } catch (error) {
+            // Логирует любые ошибки, возникшие в процессе обновления
+            console.error("Error in UPDATE: ", error.message);
+            // Возвращает статус 500 при возникновении ошибки
+            return res.status(500).json({error: 'Internal server error'});
+        }
     },
+
     getUserById: async (req, res) => {
         const {id} = req.params; // Извлекает параметр 'id' из URL запроса => :id
         const userId = req.user.userId; // Извлекает 'userId' из информации аутентифицированного пользователя
