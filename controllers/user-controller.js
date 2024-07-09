@@ -194,8 +194,27 @@ const UserController = {
         try {
             // Ищем текущего пользователя в базе данных по 'userId' аутентифицированного пользователя
             const user = await prisma.user.findUnique({
-                where: {id: req.user.userId}
+                where: {id: req.user.userId},
+                include: {
+                    followers: {
+                        // Включает информацию о подписчиках пользователя
+                        include: {
+                            follower: true
+                        }
+                    },
+                    following: {
+                        // Включает информацию о пользователях, на которых подписан текущий пользователь
+                        include: {
+                            following: true
+                        }
+                    }
+                }
             });
+
+            // Если пользователь не найден, возвращает статус 400 с сообщением об ошибке
+            if (!user) {
+                return res.status(400).json({error: 'Пользователь не найден'});
+            }
 
             // Возвращает данные текущего пользователя
             res.json(user);
@@ -206,6 +225,7 @@ const UserController = {
             res.status(500).json({error: 'Internal server error'});
         }
     },
+
 
 }
 
