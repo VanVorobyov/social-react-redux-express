@@ -2,19 +2,19 @@ const {prisma} = require('../prisma/prisma-client');
 
 
 const PostController = {
-    create: async (req, res) => {
+    createPost: async (req, res) => {
         res.send('create');
     },
-    getAll: async (req, res) => {
+    getAllPosts: async (req, res) => {
         res.send('getAll');
     },
     getPostById: async (req, res) => {
         res.send('getPostById');
     },
-    update: async (req, res) => {
+    updatePost: async (req, res) => {
         res.send('update');
     },
-    delete: async (req, res) => {
+    deletePost: async (req, res) => {
         res.send('delete');
     },
 
