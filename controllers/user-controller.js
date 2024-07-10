@@ -52,6 +52,7 @@ const UserController = {
             return res.status(500).json({error: 'Internal server error'});
         }
     },
+
     login: async (req, res) => {
         // какие поля принимаем для работы
         const {email, password} = req.body;
@@ -90,6 +91,7 @@ const UserController = {
             return res.status(500).json({error: 'Internal server error'});
         }
     },
+
     updateUser: async (req, res) => {
         // Извлекает параметр 'id' из URL запроса => :id
         const {id} = req.params;
@@ -225,8 +227,6 @@ const UserController = {
             res.status(500).json({error: 'Internal server error'});
         }
     },
-
-
 }
 
 module.exports = UserController
