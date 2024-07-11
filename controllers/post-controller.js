@@ -33,9 +33,45 @@ const PostController = {
         }
     },
 
+
     getAllPosts: async (req, res) => {
-        res.send('getAll');
+        // Получаем ID пользователя из данных запроса
+        const userId = req.user.userId;
+
+        try {
+            // Ищем все посты в базе данных с использованием Prisma
+            const posts = await prisma.post.findMany({
+                // Включаем данные об авторе, лайках и комментариях для каждого поста
+                include: {
+                    author: true,
+                    likes: true,
+                    comments: true
+                },
+                // Сортируем посты по дате создания в порядке убывания
+                orderBy: {
+                    createdAt: 'desc'
+                },
+            });
+
+            // Добавляем информацию о том, поставил ли текущий пользователь лайк на каждый пост
+            const postWithLikeInfo = posts.map(post => ({
+                ...post,
+                likedByUser: post.likes.some(
+                    (like) => like.userId === userId
+                )
+            }));
+
+            // Возвращаем посты с дополнительной информацией о лайках в ответе
+            res.json(postWithLikeInfo);
+
+        } catch (error) {
+            // Логируем ошибку в консоль
+            console.error("Ошибка: ", error.message);
+            // Возвращаем ответ с ошибкой и статусом 500
+            res.status(500).json({error: 'Не удалось получить посты'});
+        }
     },
+
     getPostById: async (req, res) => {
         res.send('getPostById');
     },
