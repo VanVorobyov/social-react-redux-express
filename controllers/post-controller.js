@@ -97,7 +97,7 @@ const PostController = {
 
             // Если пост не найден, возвращаем ответ с ошибкой и статусом 400
             if (!post) {
-                return res.status(400).json({error: 'Пост не найден'});
+                return res.status(404).json({error: 'Пост не найден'});
             }
 
             // Добавляем информацию о том, поставил ли текущий пользователь лайк на пост
@@ -119,11 +119,50 @@ const PostController = {
         }
     },
 
-    updatePost: async (req, res) => {
-        res.send('update');
-    },
+
     deletePost: async (req, res) => {
-        res.send('delete');
+        const {id} = req.params;
+        const userId = req.user.userId;
+
+        const post = await prisma.post.findUnique({
+            where: {
+                id,
+            }
+        });
+
+        if (!post) {
+            return res.status(404).json({error: 'Пост не найден'});
+        }
+
+        if (post.authorId !== userId) {
+            return res.status(403).json({error: 'Неn доступа'});
+        }
+
+        try {
+            const transaction = await prisma.$transaction(
+                [
+                    prisma.comment.deleteMany({
+                        where: {
+                            postId: id
+                        }
+                    }),
+                    prisma.like.deleteMany({
+                        where: {
+                            postId: id
+                        }
+                    }),
+                    prisma.post.delete({
+                        where: {
+                            id
+                        }
+                    })
+                ]
+            )
+            res.json(transaction);
+        } catch (error) {
+            console.error("Error in DELETE POST ", error.message);
+            res.status(500).json({error: 'Internal server error'});
+        }
     },
 
 }
