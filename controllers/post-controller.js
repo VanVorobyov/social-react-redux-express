@@ -73,8 +73,52 @@ const PostController = {
     },
 
     getPostById: async (req, res) => {
-        res.send('getPostById');
+        // Извлекаем параметр 'id' из URL запроса => :id
+        const {id} = req.params;
+        // Извлекаем 'userId' из информации аутентифицированного пользователя
+        const userId = req.user.userId;
+
+        try {
+            // Ищем пост в базе данных с использованием Prisma
+            const post = await prisma.post.findUnique({
+                // Указываем условие поиска по ID
+                where: {id},
+                // Включаем данные об авторе, лайках и комментариях для поста
+                include: {
+                    author: true,
+                    likes: true,
+                    comments: {
+                        include: {
+                            user: true,
+                        }
+                    },
+                },
+            });
+
+            // Если пост не найден, возвращаем ответ с ошибкой и статусом 400
+            if (!post) {
+                return res.status(400).json({error: 'Пост не найден'});
+            }
+
+            // Добавляем информацию о том, поставил ли текущий пользователь лайк на пост
+            const postWithLikeInfo = {
+                ...post,
+                likedByUser: post.likes.some(
+                    (like) => like.userId === userId
+                )
+            };
+
+            // Возвращаем пост с дополнительной информацией о лайках в ответе
+            res.json(postWithLikeInfo);
+
+        } catch (error) {
+            // Логируем ошибку в консоль
+            console.error("Error in getPostById", error.message);
+            // Возвращаем ответ с ошибкой и статусом 500
+            res.status(500).json({error: 'Не удалось получить пост'});
+        }
     },
+
     updatePost: async (req, res) => {
         res.send('update');
     },
