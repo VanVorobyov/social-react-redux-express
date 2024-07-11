@@ -120,50 +120,62 @@ const PostController = {
     },
 
 
+    // Асинхронный метод для удаления поста
     deletePost: async (req, res) => {
+        // Извлекаем параметр 'id' из URL запроса => :id
         const {id} = req.params;
+        // Извлекаем 'userId' из информации аутентифицированного пользователя
         const userId = req.user.userId;
 
+        // Ищем пост в базе данных с использованием Prisma
         const post = await prisma.post.findUnique({
             where: {
                 id,
             }
         });
 
+        // Если пост не найден, возвращаем ответ с ошибкой и статусом 404
         if (!post) {
             return res.status(404).json({error: 'Пост не найден'});
         }
 
+        // Если пользователь не является автором поста, возвращаем ответ с ошибкой и статусом 403
         if (post.authorId !== userId) {
-            return res.status(403).json({error: 'Неn доступа'});
+            return res.status(403).json({error: 'Нет доступа'});
         }
 
         try {
-            const transaction = await prisma.$transaction(
-                [
-                    prisma.comment.deleteMany({
-                        where: {
-                            postId: id
-                        }
-                    }),
-                    prisma.like.deleteMany({
-                        where: {
-                            postId: id
-                        }
-                    }),
-                    prisma.post.delete({
-                        where: {
-                            id
-                        }
-                    })
-                ]
-            )
+            // Удаляем пост и связанные данные в одной транзакции с использованием Prisma
+            const transaction = await prisma.$transaction([
+                // Удаляем все комментарии, связанные с постом
+                prisma.comment.deleteMany({
+                    where: {
+                        postId: id
+                    }
+                }),
+                // Удаляем все лайки, связанные с постом
+                prisma.like.deleteMany({
+                    where: {
+                        postId: id
+                    }
+                }),
+                // Удаляем сам пост
+                prisma.post.delete({
+                    where: {
+                        id
+                    }
+                })
+            ]);
+            // Возвращаем результат транзакции в ответе
             res.json(transaction);
         } catch (error) {
+            // Логируем ошибку в консоль
             console.error("Error in DELETE POST ", error.message);
+            // Возвращаем ответ с ошибкой и статусом 500
             res.status(500).json({error: 'Internal server error'});
         }
     },
+
 
 }
 
