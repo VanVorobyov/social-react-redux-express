@@ -81,7 +81,7 @@ const UserController = {
             }
 
             // генерируем токен
-            const token = jwt.sign({userId: user.id}, process.env.JWT_SECRET, {expiresIn: '1h'});
+            const token = jwt.sign({userId: user.id}, process.env.JWT_SECRET, {expiresIn: process.env.TOKEN_EXPIRES_IN});
 
             // возвращаем токен
             res.json({token});
