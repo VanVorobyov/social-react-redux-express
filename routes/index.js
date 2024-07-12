@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 // const multer = require('multer');
-const {UserController, PostController} = require("../controllers");
+const {UserController, PostController, LikeController} = require("../controllers");
 const multer = require("multer");
 const {authenticateToken} = require("../middleware/auth");
 
@@ -36,6 +36,10 @@ router.get('/posts', authenticateToken, PostController.getAllPosts);
 router.get('/posts/:id', authenticateToken, PostController.getPostById);
 router.post('/posts', authenticateToken, PostController.createPost);
 router.delete('/posts/:id', authenticateToken, PostController.deletePost);
+
+// Роуты Like
+router.post('/likes', authenticateToken, LikeController.likePost);
+router.delete('/likes/:id', authenticateToken, LikeController.dislikePost);
 
 
 module.exports = router;

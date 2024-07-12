@@ -1,6 +1,6 @@
 const UserController = require('./user-controller');
 const PostController = require('./post-controller');
-const LikeController = require('./post-controller');
+const LikeController = require('./like-controller');
 
 module.exports = {
     UserController,

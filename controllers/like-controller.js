@@ -8,3 +8,5 @@ const LikeController = {
         res.send("dislikePost")
     }
 }
+
+module.exports = LikeController
