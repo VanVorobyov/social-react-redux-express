@@ -1,10 +1,20 @@
 version: '3.7'
 services:
-  db:
+
+  db: # База данных MongoDB Single Replica
     image: prismagraphql/mongo-single-replica:4.4.3-bionic
     platform: linux/amd64
     ports:
-      - 27016:27017
+      - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: monty
       MONGO_INITDB_ROOT_PASSWORD: pass
+
+  express-app: # Сервер Express
+    build: .
+    ports:
+      - '3005:3005'
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: 'mongodb://monty:pass@db:27017/mydatabase?authSource=admin&directConnection=true'
