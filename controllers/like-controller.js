@@ -3,12 +3,11 @@ const {prisma} = require('../prisma/prisma-client');
 const LikeController = {
   // Метод для постановки лайка на пост
   likePost: async (req, res) => {
-    const {id} = req.params; // Извлечение postId из параметров запроса
+    const {postId} = req.body; // Извлечение postId из параметров запроса
     const userId = req.user.userId; // Извлечение userId из аутентифицированного пользователя
-    console.log(`postId --> `, postId);
     
     // Проверка, указан ли postId
-    if (!id) {
+    if (!postId) {
       return res.status(400).
       json({error: 'Все поля обязательные для заполнения'}); // Возвращение ошибки, если postId отсутствует
     }
@@ -17,7 +16,7 @@ const LikeController = {
       // Проверка, ставил ли пользователь уже лайк на этот пост
       const existingLike = await prisma.like.findFirst({
         where: {
-          postId: id,
+          postId,
           userId,
         },
       });
@@ -30,7 +29,7 @@ const LikeController = {
       // Создание новой записи лайка в базе данных
       const like = await prisma.like.create({
         data: {
-          postId: id,
+          postId,
           userId,
         },
       });

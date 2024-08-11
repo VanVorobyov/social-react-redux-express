@@ -1,18 +1,23 @@
 const express = require('express');
 const router = express.Router();
 // const multer = require('multer');
-const {UserController, PostController, LikeController, CommentController, FollowController} = require("../controllers");
-const multer = require("multer");
-const {authenticateToken} = require("../middleware/auth");
-
+const {
+  UserController,
+  PostController,
+  LikeController,
+  CommentController,
+  FollowController,
+} = require('../controllers');
+const multer = require('multer');
+const {authenticateToken} = require('../middleware/auth');
 
 // // -------------------------------------------------- Где будем хранить файлы
 const uploadsDestination = 'uploads';
 const storage = multer.diskStorage({
-    destination: uploadsDestination,
-    filename: function (req, file, cb) {
-        cb(null, file.originalname)
-    }
+  destination: uploadsDestination,
+  filename: function(req, file, cb) {
+    cb(null, file.originalname);
+  },
 });
 
 const upload = multer({storage: storage});
@@ -21,7 +26,7 @@ const upload = multer({storage: storage});
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
-    res.render('index', {title: 'Express'});
+  res.render('index', {title: 'Express'});
 });
 
 // Роуты User
@@ -43,11 +48,12 @@ router.delete('/likes/:id', authenticateToken, LikeController.dislikePost);
 
 // Роуты Comment
 router.post('/comments', authenticateToken, CommentController.createComment);
-router.delete('/comments/:id', authenticateToken, CommentController.deleteComment);
+router.delete('/comments/:id', authenticateToken,
+    CommentController.deleteComment);
 
 // Роуты Follow
 router.post('/follow', authenticateToken, FollowController.followUser);
-router.delete('/unfollow/:id', authenticateToken, FollowController.unfollowUser);
-
+router.delete('/unfollow/:id', authenticateToken,
+    FollowController.unfollowUser);
 
 module.exports = router;
